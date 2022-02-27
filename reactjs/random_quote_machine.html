@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Quote Machine</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Fontawesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .wrapper {
+            /* background-color: thistle; */
+            height: 100vh;
+            animation: animationBackground 1.5s;
+        }
+
+        @keyframes animationBackground {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .box {
+            width: 450px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px 40px 30px 40px;
+            border-radius: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js" ></script>
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <!-- Babel CDN -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- src -->
+    <script type="text/babel">
+
+        const colors = [
+            'thistle',
+            'rosybrown',
+            'royalblue',
+            'saddlebrown',
+            'salmon',
+            'sandybrown',
+            'seagreen',
+            'yellowgreen',
+            'violet',
+            'teal'
+        ]
+
+        class App extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    quotes: [],
+                    current: 0,
+                    color: '',
+                }
+                
+                this.fetchQuotes = this.fetchQuotes.bind(this);
+                this.handleNextQuote = this.handleNextQuote.bind(this);
+            }
+
+            async componentDidMount() {
+                const quoteData = await this.fetchQuotes();
+                this.setState({
+                    quotes: [...quoteData.quotes]
+                });
+
+                this.handleNextQuote();
+            }
+
+            async fetchQuotes() {
+                const url = 'https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json';
+                return await (await fetch(url)).json();
+            }
+
+            handleNextQuote() {
+                const numberOfQuotes = this.state.quotes.length;
+                const indexOfQuote = Math.floor(Math.random() * numberOfQuotes);
+                const indexOfColor = indexOfQuote % colors.length;
+                this.setState({
+                    current: indexOfQuote,
+                    color: colors[indexOfColor]
+                });
+            }
+
+            render() {
+                const backgroundColor = {
+                    backgroundColor: this.state.color,
+                }
+                return (
+                    <div className="d-flex justify-content-center align-items-center wrapper" style={backgroundColor}>
+                        <Box 
+                            {...this.state.quotes[this.state.current]}
+                            color={this.state.color}
+                            nextQuote={this.handleNextQuote}
+                        />
+                    </div>
+                )
+            }
+        }
+
+        class Box extends React.Component {
+            constructor(props) {
+                super(props);
+            }
+
+            render() {
+                const { quote, author, color, nextQuote } = this.props;
+                let backgroundColor = {
+                    backgroundColor: color
+                }
+                let textColor = {
+                    color: color
+                }
+
+                let hrefTwitter = 'https://twitter.com/intent/tweet?hashtags=quotes&related=freecodecamp&text=' + encodeURIComponent('"' + quote + '"' + author);
+                let hrefTumblr =  'https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes,freecodecamp&caption=' + encodeURIComponent(author) + '&content=' + encodeURIComponent(quote) + '&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button';
+
+                return (
+                    <div className='box' id="quote-box">
+                        <blockquote className="blockquote">
+                            <p id="text" className="text-center" style={textColor}><i className="fas fa-quote-left mr-2"></i>{quote}</p>
+                            <footer className="blockquote-footer text-right" style={textColor}><cite id="author" title="Source Title">{author}</cite></footer>
+                        </blockquote>
+                        <div className='d-flex justify-content-between'>
+                            <div>
+                                <a href={hrefTwitter} className='btn mr-2' style={backgroundColor}><i className="fab fa-twitter text-white"></i></a>
+                                <a id="tweet-quote" href={hrefTumblr} className='btn pl-3 pr-3' style={backgroundColor}><i className="fab fa-tumblr text-white"></i></a>
+                            </div>
+                            <div>
+                                <button id="new-quote" className='btn text-white' style={backgroundColor} onClick={nextQuote}>New Quote</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

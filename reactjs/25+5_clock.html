@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>25 + 5 Clock</title>
+        <!-- Bootstrap -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+            crossorigin="anonymous"
+        />
+        <!-- Fontawesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+            integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <style>
+            .box {
+                width: 500px;
+                background-color: darkgray;
+                padding: 20px 0px;
+                border-radius: 15px;
+            }
+
+            .icon {
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .icon:hover {
+                color: red;
+            }
+
+            #break-length,
+            #session-length {
+                margin: 0 20px;
+            }
+
+            .session-box {
+                width: 200px;
+                margin: 0 auto;
+                margin-bottom: 25px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                border: 4px solid white;
+                border-radius: 15px;
+            }
+
+            #start_stop,
+            #reset {
+                background-color: darkgray;
+                border: none;
+                font-size: 24px;
+                color: white;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+        <!-- React CDN -->
+        <script
+            crossorigin
+            src="https://unpkg.com/react@17/umd/react.production.min.js"
+        ></script>
+        <script
+            crossorigin
+            src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
+        ></script>
+        <!-- Babel CDN -->
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <!-- src -->
+        <script type="text/babel">
+            const App = () => {
+                const formatTime = (value) => {
+                    let m = Math.floor(value / 60);
+                    let s = value % 60;
+                    return `0${m}`.slice(-2) + `:` + `0${s}`.slice(-2);
+                };
+                var interval = null;
+                const [stop, setStop] = React.useState(true);
+                const [break_, setBreak_] = React.useState(5);
+                const [session, setSession] = React.useState(25);
+                const [started, setStarted] = React.useState(false);
+                const [onSession, setOnSession] = React.useState("Session");
+                const [displayTime, setDisplayTime] = React.useState(
+                    formatTime(session * 60)
+                );
+                const [addColor, setAddColor] = React.useState(false);
+
+                const handleBreakDecrement = () => {
+                    if (break_ > 1 && !started) {
+                        setBreak_(break_ - 1);
+                    }
+                };
+                const handleSessionDecrement = () => {
+                    if (session > 1 && !started) {
+                        let m = session - 1;
+                        setSession(m);
+                        setDisplayTime(formatTime(m * 60));
+                    }
+                };
+                const handleBreakIncrement = () => {
+                    if (break_ < 60 && !started) {
+                        setBreak_(break_ + 1);
+                    }
+                };
+                const handleSessionIncrement = () => {
+                    if (session < 60 && !started) {
+                        let m = session + 1;
+                        setSession(m);
+                        setDisplayTime(formatTime(m * 60));
+                    }
+                };
+
+                const reset = () => {
+                    setBreak_(5);
+                    setSession(25);
+                    setStop(true);
+                    setStarted(false);
+                    setOnSession("Session");
+                    setDisplayTime(formatTime(25 * 60));
+                    setAddColor(false);
+                    clearInterval(sessionStorage.getItem("interval"));
+                    const playAudio = document.getElementById("beep");
+                    playAudio.currentTime = 0;
+                    playAudio.pause();
+                };
+
+                const run = (timer) => {
+                    interval = setInterval(() => {
+                        setDisplayTime(formatTime(timer));
+
+                        if (timer === 0) {
+                            setOnSession((prev) => {
+                                if (prev === "Session") {
+                                    timer = break_ * 60 + 1;
+                                    return "Break";
+                                }
+                                timer = session * 60 + 1;
+                                return "Session";
+                            });
+
+                            const playAudio = document.getElementById("beep");
+                            playAudio.currentTime = 0;
+                            playAudio.play();
+                        }
+                        if (timer < 60) {
+                            setAddColor(true);
+                        } else {
+                            setAddColor(false);
+                        }
+                        timer--;
+                        //setDisplayTime(formatTime(timer));
+                        sessionStorage.setItem("timer", timer);
+                    }, 1000);
+                    sessionStorage.setItem("interval", interval);
+                };
+                const start = () => {
+                    let flag = stop;
+                    setStop(!stop);
+                    if (!started) {
+                        setStarted(true);
+                        run(session * 60);
+                    } else {
+                        if (!flag) {
+                            clearInterval(sessionStorage.getItem("interval"));
+                        } else {
+                            let timer = sessionStorage.getItem("timer");
+                            run(timer);
+                        }
+                    }
+                };
+                return (
+                    <div className="min-vh-100 d-flex justify-content-center align-items-center">
+                        <div className="box text-center text-white">
+                            <h1 className="mb-4">25 + 5 Clock</h1>
+                            <div className="d-flex justify-content-evenly mb-4">
+                                <div>
+                                    <h2 id="break-label">Break Length</h2>
+                                    <i
+                                        id="break-decrement"
+                                        className="fas fa-chevron-down icon fs-5"
+                                        onClick={() => handleBreakDecrement()}
+                                    ></i>
+                                    <span className="fs-5" id="break-length">
+                                        {break_}
+                                    </span>
+                                    <i
+                                        id="break-increment"
+                                        className="fas fa-chevron-up icon fs-5"
+                                        onClick={() => handleBreakIncrement()}
+                                    ></i>
+                                </div>
+                                <div>
+                                    <h2 id="session-label">Session Length</h2>
+                                    <i
+                                        id="session-decrement"
+                                        className="fas fa-chevron-down icon fs-5"
+                                        onClick={() => handleSessionDecrement()}
+                                    ></i>
+                                    <span className="fs-5" id="session-length">
+                                        {session}
+                                    </span>
+                                    <i
+                                        id="session-increment"
+                                        className="fas fa-chevron-up icon fs-5"
+                                        onClick={() => handleSessionIncrement()}
+                                    ></i>
+                                </div>
+                            </div>
+                            <div
+                                className={
+                                    addColor
+                                        ? "session-box text-danger"
+                                        : "session-box"
+                                }
+                            >
+                                <h2 id="timer-label">{onSession}</h2>
+                                <h3 id="time-left">{displayTime}</h3>
+                            </div>
+                            <div className="d-flex justify-content-evenly">
+                                <button onClick={() => start()} id="start_stop">
+                                    {stop ? (
+                                        <i class="fas fa-play icon"></i>
+                                    ) : (
+                                        <i class="fas fa-stop icon"></i>
+                                    )}
+                                </button>
+
+                                <button id="reset" onClick={() => reset()}>
+                                    <i class="fas fa-redo icon"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <audio
+                                    id="beep"
+                                    src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"
+                                ></audio>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            ReactDOM.render(<App />, document.getElementById("root"));
+        </script>
+    </body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Redux demo</title>
+</head>
+	<h1>Redux demo</h1>
+	<form id="hobbyFormId">
+		Enter your hobby: <input type="text" id="hobbyTextId">
+	</form>
+	<h2>My hobbies:</h2>
+	<ul id="hobbyListId"></ul>
+<body>
+	<script src="https://unpkg.com/redux@4.1.1/dist/redux.js"></script>
+	<script type="text/javascript">
+		// console.log(window.Redux);
+		const { createStore } = window.Redux;
+
+		// SETUP REDUX STORE
+		// state
+		 
+		const initialState = JSON.parse(sessionStorage.getItem('hobby-list')) || [];
+		// reducer
+		const hobbyReducer = (state = initialState, action) => {
+			switch (action.type) {
+				case 'ADD_HOBBY':
+					return [action.payload, ...state];
+				default:
+					return state;
+			}
+		}
+		// store
+		const store = createStore(hobbyReducer);
+
+		// RENDER REDUX HOBBY LIST
+		const renderHobbyList = (hobbyList) => {
+			if (!Array.isArray(hobbyList) || hobbyList.length === 0) return;
+
+			const ulElement = document.querySelector('#hobbyListId');
+			if (!ulElement) return;
+
+			// reset previous content of ul
+			ulElement.innerHTML = '';
+
+			for (const hobby of hobbyList) {
+				const liElement = document.createElement('li');
+				liElement.textContent = hobby;
+				ulElement.appendChild(liElement);
+			}
+		}
+
+		// RENDER INITIAL HOBBY LIST
+		const initialHobbyList = store.getState();
+		renderHobbyList(initialHobbyList);
+
+		// HANDLE FORM SUBMIT
+		const hobbyFormElement = document.querySelector('#hobbyFormId');
+		if (hobbyFormElement) {
+			const handleFormSubmit = (e) => {
+				e.preventDefault();
+
+				const hobbyTextElement = hobbyFormElement.querySelector('#hobbyTextId');
+				if (!hobbyTextElement) return;
+
+				const action = {
+					type: 'ADD_HOBBY',
+					payload: hobbyTextElement.value
+				}
+
+				store.dispatch(action);
+				// reset form
+				hobbyFormElement.reset();
+				// hobbyTextElement.value = '';
+			};
+
+			hobbyFormElement.addEventListener('submit', handleFormSubmit);
+		}
+
+		store.subscribe(() => {
+			const data = store.getState();
+			sessionStorage.setItem('hobby-list', JSON.stringify(data));
+			renderHobbyList(data);
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Javascript Calculator</title>
+        <!-- Bootstrap -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+            crossorigin="anonymous"
+        />
+        <style>
+            .box {
+                background-color: limegreen;
+                width: 280px;
+            }
+
+            .screen {
+                width: 100%;
+                background-color: lime;
+                padding: 0 5px;
+                border: 1px solid white;
+            }
+
+            .text-fake {
+                color: lime;
+            }
+
+            .calculation {
+                margin-bottom: 0;
+                color: black;
+                font-size: 20px;
+                width: 100%;
+                overflow-y: auto;
+            }
+
+            .result {
+                margin-bottom: 0;
+                color: red;
+                font-size: 22px;
+            }
+
+            table {
+                width: 100%;
+                text-align: center;
+            }
+
+            td {
+                border: 1px solid white;
+            }
+
+            button {
+                background-color: limegreen;
+                color: white;
+                width: 100%;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                cursor: pointer;
+                font-size: 20px;
+                transition: all 0.3s;
+                border: none;
+            }
+
+            button:hover {
+                background-color: lime;
+            }
+
+            .equals {
+                padding-top: 37px;
+                padding-bottom: 37px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+        <!-- React CDN -->
+        <script
+            crossorigin
+            src="https://unpkg.com/react@17/umd/react.production.min.js"
+        ></script>
+        <script
+            crossorigin
+            src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
+        ></script>
+        <!-- Babel CDN -->
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <!-- src -->
+        <script type="text/babel">
+            const App = () => {
+                const [currentVal, setCurrentVal] = React.useState("0");
+                const [expression, setExpression] = React.useState("");
+                const [prevVal, setPrevVal] = React.useState("");
+                const [calculated, setCalculated] = React.useState(false);
+
+                const handleClear = () => {
+                    setCurrentVal("0");
+                    setExpression("");
+                    setPrevVal("");
+                    setCalculated(false);
+                    console.log("handle clear");
+                };
+
+                const endWithOperator = (exp) => {
+                    let latest = exp[exp.length - 1];
+                    return (
+                        latest === "+" ||
+                        latest === "-" ||
+                        latest === "x" ||
+                        latest === "/"
+                    );
+                };
+
+                const handleNumber = (e) => {
+                    let val = e.target.value;
+
+                    if (calculated) {
+                        setCurrentVal(val);
+                        setExpression(val);
+                        setCalculated(false);
+                    } else if (
+                        expression === "" ||
+                        endWithOperator(expression)
+                    ) {
+                        setCurrentVal("");
+                        setCurrentVal((prev) => prev + val);
+                        setExpression(expression + val);
+                    } else {
+                        if (
+                            !(
+                                currentVal.length === 1 &&
+                                currentVal === "0" &&
+                                val === "0"
+                            )
+                        ) {
+                            setCurrentVal((prev) => prev + val);
+                            setExpression(expression + val);
+                        }
+                    }
+                };
+
+                const handleOperator = (e) => {
+                    const endWithNegativeSign = (exp) => {
+                        let latest = exp[exp.length - 1];
+                        return latest === "-";
+                    };
+
+                    let val = e.target.value;
+                    setCurrentVal(val);
+                    if (calculated) {
+                        setExpression(prevVal + val);
+                        setPrevVal("");
+                        setCalculated(false);
+                    } else if (!endWithOperator(expression)) {
+                        // Neu ket thuc khong phai la mot toan tu
+                        setExpression(expression + val);
+                    } else if (!endWithNegativeSign(expression)) {
+                        // Neu ket thuc la mot toan tu *, /, +
+                        if (val !== "-") {
+                            setExpression(expression.slice(0, -1) + val);
+                        } else {
+                            setExpression(expression + val);
+                        }
+                    } else {
+                        // Neu ket thuc la toan tu -
+                        if (
+                            !endWithNegativeSign(expression.slice(0, -1)) &&
+                            val === "-"
+                        ) {
+                            setExpression(expression + val);
+                        } else {
+                            setExpression(expression.slice(0, -2) + val);
+                        }
+                    }
+                };
+
+                const handleDecimal = (e) => {
+                    const checkDecimal = (exp) => {
+                        return exp.includes(".");
+                    };
+                    let val = e.target.value;
+                    if (calculated || expression === "") {
+                        setExpression("0.");
+                        setCurrentVal("0.");
+                        setCalculated(false);
+                    } else if (endWithOperator(expression)) {
+                        // Neu ket thuc la 1 toan tu
+                        setCurrentVal("0.");
+                        setExpression(expression + "0.");
+                    } else if (!checkDecimal(currentVal)) {
+                        // Neu ket thuc khong phai la .
+                        setCurrentVal((prev) => prev + val);
+                        setExpression(expression + val);
+                    }
+                };
+
+                const calculate = () => {
+                    let exp = expression;
+                    while (/[x+‑/]$/.test(exp)) {
+                        exp = exp.slice(0, -1);
+                    }
+                    exp = exp.replace(/x/g, "*").replace(/‑/g, "-");
+                    let ans = eval(exp);
+                    setExpression(
+                        exp
+                            .replace(/\*/g, "⋅")
+                            .replace(/-/g, "‑")
+                            .replace(/(x|\/|\+)‑/, "$1-")
+                            .replace(/^‑/, "-") +
+                            "=" +
+                            ans
+                    );
+                    setCurrentVal(ans.toString());
+                    setCalculated(true);
+                    setPrevVal(ans.toString());
+                };
+
+                return (
+                    <div className="min-vh-100 d-flex justify-content-center align-items-center text-white">
+                        <div className="box">
+                            <div className="screen">
+                                <p className="calculation text-end">
+                                    {expression ? (
+                                        expression
+                                    ) : (
+                                        <span className="text-fake">.</span>
+                                    )}
+                                </p>
+                                <p id="display" className="result text-end">
+                                    {currentVal}
+                                </p>
+                            </div>
+                            <div>
+                                <table>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button
+                                                id="clear"
+                                                onClick={() => handleClear()}
+                                            >
+                                                AC
+                                            </button>
+                                        </td>
+                                        <td className="w-25">
+                                            <button
+                                                id="divide"
+                                                value="/"
+                                                onClick={(e) =>
+                                                    handleOperator(e)
+                                                }
+                                            >
+                                                /
+                                            </button>
+                                        </td>
+                                        <td className="w-25">
+                                            <button
+                                                id="multiply"
+                                                value="x"
+                                                onClick={(e) =>
+                                                    handleOperator(e)
+                                                }
+                                            >
+                                                X
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <button
+                                                id="seven"
+                                                value="7"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                7
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="eight"
+                                                value="8"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                8
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="nine"
+                                                value="9"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                9
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="subtract"
+                                                value="-"
+                                                onClick={(e) =>
+                                                    handleOperator(e)
+                                                }
+                                            >
+                                                -
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <button
+                                                id="four"
+                                                value="4"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                4
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="five"
+                                                value="5"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                5
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="six"
+                                                value="6"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                6
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="add"
+                                                value="+"
+                                                onClick={(e) =>
+                                                    handleOperator(e)
+                                                }
+                                            >
+                                                +
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <button
+                                                id="one"
+                                                value="1"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                1
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="two"
+                                                value="2"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                2
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="three"
+                                                value="3"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                3
+                                            </button>
+                                        </td>
+                                        <td rowspan="2">
+                                            <button
+                                                className="equals"
+                                                id="equals"
+                                                value="-"
+                                                onClick={() => calculate()}
+                                            >
+                                                =
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button
+                                                id="zero"
+                                                value="0"
+                                                onClick={(e) => handleNumber(e)}
+                                            >
+                                                0
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button
+                                                id="decimal"
+                                                value="."
+                                                onClick={(e) =>
+                                                    handleDecimal(e)
+                                                }
+                                            >
+                                                .
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+            ReactDOM.render(<App />, document.getElementById("root"));
+        </script>
+    </body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Drum Machine</title>
+        <!-- Bootstrap -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+            crossorigin="anonymous"
+        />
+        <!-- Fontawesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+            integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <style>
+            .box {
+                width: 400px;
+                text-align: center;
+                border: 1px solid springgreen;
+                background-color: springgreen;
+                padding-bottom: 10px;
+                padding-top: 10px;
+                border-radius: 10px;
+            }
+
+            .padCurrent {
+                width: 60%;
+                background-color: lightgrey;
+                margin: 10px auto;
+                padding: 10px 0;
+                color: deeppink;
+            }
+
+            .form-label {
+                font-size: 26px;
+            }
+
+            .form-range {
+                width: 60%;
+            }
+
+            .icon {
+                cursor: pointer;
+            }
+
+            .pad {
+                display: inline-block;
+                margin: 20px;
+                width: 60px;
+                height: 60px;
+                padding-top: 15px;
+                font-size: 20px;
+                border-radius: 10px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+        <!-- React CDN -->
+        <script
+            crossorigin
+            src="https://unpkg.com/react@17/umd/react.production.min.js"
+        ></script>
+        <script
+            crossorigin
+            src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
+        ></script>
+        <!-- Babel CDN -->
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <!-- src -->
+        <script type="text/babel">
+            const bankOne = [
+                {
+                    keyCode: 81,
+                    keyTrigger: "Q",
+                    id: "Heater-1",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3",
+                },
+                {
+                    keyCode: 87,
+                    keyTrigger: "W",
+                    id: "Heater-2",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3",
+                },
+                {
+                    keyCode: 69,
+                    keyTrigger: "E",
+                    id: "Heater-3",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3",
+                },
+                {
+                    keyCode: 65,
+                    keyTrigger: "A",
+                    id: "Heater-4",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3",
+                },
+                {
+                    keyCode: 83,
+                    keyTrigger: "S",
+                    id: "Clap",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3",
+                },
+                {
+                    keyCode: 68,
+                    keyTrigger: "D",
+                    id: "Open-HH",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3",
+                },
+                {
+                    keyCode: 90,
+                    keyTrigger: "Z",
+                    id: "Kick-n'-Hat",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3",
+                },
+                {
+                    keyCode: 88,
+                    keyTrigger: "X",
+                    id: "Kick",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3",
+                },
+                {
+                    keyCode: 67,
+                    keyTrigger: "C",
+                    id: "Closed-HH",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3",
+                },
+            ];
+
+            const bankTwo = [
+                {
+                    keyCode: 81,
+                    keyTrigger: "Q",
+                    id: "Chord-1",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3",
+                },
+                {
+                    keyCode: 87,
+                    keyTrigger: "W",
+                    id: "Chord-2",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3",
+                },
+                {
+                    keyCode: 69,
+                    keyTrigger: "E",
+                    id: "Chord-3",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3",
+                },
+                {
+                    keyCode: 65,
+                    keyTrigger: "A",
+                    id: "Shaker",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Give_us_a_light.mp3",
+                },
+                {
+                    keyCode: 83,
+                    keyTrigger: "S",
+                    id: "Open-HH",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Dry_Ohh.mp3",
+                },
+                {
+                    keyCode: 68,
+                    keyTrigger: "D",
+                    id: "Closed-HH",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Bld_H1.mp3",
+                },
+                {
+                    keyCode: 90,
+                    keyTrigger: "Z",
+                    id: "Punchy-Kick",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/punchy_kick_1.mp3",
+                },
+                {
+                    keyCode: 88,
+                    keyTrigger: "X",
+                    id: "Side-Stick",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3",
+                },
+                {
+                    keyCode: 67,
+                    keyTrigger: "C",
+                    id: "Snare",
+                    url: "https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3",
+                },
+            ];
+
+            const App = () => {
+                const [online, setOnline] = React.useState(true);
+                const [source, setSource] = React.useState({
+                    type: "Heater Kit",
+                    data: bankOne,
+                });
+                const [padCurrent, setPadCurrent] = React.useState(source.type);
+                const [volume, setVolume] = React.useState(0.25);
+                return (
+                    <div
+                        id="drum-machine"
+                        className="min-vh-100 d-flex justify-content-center align-items-center text-white"
+                    >
+                        <div className="box">
+                            <h1 className="text-center">Drum Machine</h1>
+                            {source.data.map((item) => (
+                                <Pad
+                                    key={item.id}
+                                    data={item}
+                                    setPadCurrent={setPadCurrent}
+                                    volume={volume}
+                                    online={online}
+                                />
+                            ))}
+
+                            <div id="display" className="padCurrent">
+                                {padCurrent}
+                            </div>
+                            <div>
+                                <label htmlFor="volume" class="form-label">
+                                    Volume
+                                </label>
+                                <br />
+                                <input
+                                    type="range"
+                                    className="form-range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    id="volume"
+                                    value={volume}
+                                    onChange={(e) => {
+                                        setVolume(e.target.value);
+                                    }}
+                                />
+                            </div>
+                            <div className="d-flex justify-content-evenly mt-3">
+                                <div>
+                                    <p className="mb-1 fs-4">Power</p>
+                                    {online ? (
+                                        <i
+                                            class="fas fa-toggle-on fs-3"
+                                            onClick={() => setOnline(false)}
+                                        ></i>
+                                    ) : (
+                                        <i
+                                            class="fas fa-toggle-off fs-3"
+                                            onClick={() => setOnline(true)}
+                                        ></i>
+                                    )}
+                                </div>
+                                <div className="">
+                                    <p className="mb-1 fs-4">Bank</p>
+                                    {source.type === "Heater Kit" ? (
+                                        <i
+                                            class="fas fa-toggle-on fs-3"
+                                            onClick={() => {
+                                                setSource({
+                                                    type: "Smooth Piano Kit",
+                                                    data: bankTwo,
+                                                });
+                                                setPadCurrent(
+                                                    "Smooth Piano Kit"
+                                                );
+                                            }}
+                                        ></i>
+                                    ) : (
+                                        <i
+                                            class="fas fa-toggle-off fs-3"
+                                            onClick={() => {
+                                                setSource({
+                                                    type: "Heater Kit",
+                                                    data: bankOne,
+                                                });
+                                                setPadCurrent("Heater Kit");
+                                            }}
+                                        ></i>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const Pad = ({ data, setPadCurrent, volume, online }) => {
+                const [active, setActive] = React.useState(false);
+
+                React.useEffect(() => {
+                    document.addEventListener("keydown", handleKeyPress);
+                    return () => {
+                        document.removeEventListener("keydown", handleKeyPress);
+                    };
+                }, [online, volume, data]);
+
+                const handleKeyPress = (e) => {
+                    if (e.keyCode === data.keyCode) {
+                        playSound();
+                    }
+                };
+
+                const playSound = () => {
+                    if (online) {
+                        setPadCurrent(data.id);
+                        setActive(true);
+                        setTimeout(() => {
+                            setActive(false);
+                        }, 200);
+                        const audioElement = document.getElementById(
+                            data.keyTrigger
+                        );
+                        audioElement.volume = volume;
+                        audioElement.currentTime = 0;
+                        audioElement.play();
+                    } else {
+                        setPadCurrent("Turn on to play!");
+                    }
+                };
+
+                return (
+                    <div
+                        id={data.id}
+                        onClick={playSound}
+                        className={`drum-pad pad bg-secondary ${
+                            active && "bg-warning"
+                        }`}
+                    >
+                        <audio
+                            className="clip"
+                            id={data.keyTrigger}
+                            src={data.url}
+                        />{" "}
+                        {data.keyTrigger}
+                    </div>
+                );
+            };
+
+            ReactDOM.render(<App />, document.getElementById("root"));
+        </script>
+    </body>
+</html>
